@@ -1,0 +1,508 @@
+
+{% extends 'packager_base.html' %}
+
+{% block title %}package list{% endblock %}
+
+{% block content %}
+
+{%load static%}
+
+
+<body>
+
+  <style>
+    :root {
+      --primary: #043612;
+      --primary-light: #93c5fd;
+      --primary-dark: #03290e;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+      --green-500: #10b981;
+      --red-500: #ef4444;
+      --yellow-500: #f59e0b;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    
+    
+    .containerp {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    
+    .profile-card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+    
+    .profile-header {
+      background-color: var(--primary);
+      padding: 2rem;
+      color: white;
+      position: relative;
+    }
+    
+    .profile-cover {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      opacity: 0.8;
+      z-index: 1;
+    }
+    
+    .profile-header-content {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      border: 4px solid white;
+      background-color: var(--gray-200);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: bold;
+      overflow: hidden;
+    }
+    
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .profile-info h1 {
+      font-size: 1.875rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .profile-info p {
+      opacity: 0.9;
+      margin-bottom: 1rem;
+    }
+    
+    .profile-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    
+    .badge {
+      background-color: rgba(255, 255, 255, 0.2);
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .profile-body {
+      padding: 2rem;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background-color: var(--gray-50);
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+    
+    .stat-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background-color: var(--primary-light);
+      color: var(--primary-dark);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+    
+    .stat-value {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--gray-900);
+    }
+    
+    .stat-label {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    .chart-section {
+      margin-top: 2rem;
+    }
+    
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--gray-800);
+    }
+    
+    .time-filter {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .filter-btn {
+      background-color: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--gray-600);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .filter-btn:hover {
+      background-color: var(--gray-200);
+    }
+    
+    .filter-btn.active {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    
+    .chart-container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      height: 300px;
+    }
+    
+    .bar-chart {
+      height: 225px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-top: 1.5rem;
+    }
+    
+    .bar-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .bar {
+      width: 40px;
+      background-color: var(--primary);
+      border-radius: 4px 4px 0 0;
+      transition: height 0.3s ease;
+    }
+    
+    .bar-label {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+    }
+    
+    .summary-section {
+      margin-top: 2rem;
+    }
+    
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .summary-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+    }
+    
+    .summary-card h3 {
+      font-size: 1.125rem;
+      margin-bottom: 1rem;
+      color: var(--gray-800);
+    }
+    
+    .summary-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .summary-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .summary-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background-color: var(--primary-light);
+      color: var(--primary-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+    
+    .summary-details {
+      flex: 1;
+    }
+    
+    .summary-title {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+    }
+    
+    .summary-desc {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+    }
+    
+    .summary-value {
+      font-weight: 600;
+      color: var(--gray-900);
+    }
+    
+    @media (max-width: 768px) {
+      .profile-header-content {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .profile-badges {
+        justify-content: center;
+      }
+    }
+  </style>
+
+{% for p in data %}
+  <div class="containerp">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-cover"></div>
+        <div class="profile-header-content">
+          <div class="profile-avatar">
+            {% if p.logo %}
+            <img src="{{ p.logo.url }}" alt="Logo">
+            {% else %}
+            <img src="/api/placeholder/120/120" alt="Sarah Johnson">
+            {% endif %}
+
+          </div>
+          <div class="profile-info">
+    
+
+           
+            <h1>  {{p.company_name}}</h1>
+            <p>{{p.company_description}}</p>
+            <div class="profile-badges">
+              <span class="badge">5 Years Experience</span>
+              <span class="badge">Quality Expert</span>
+              <span class="badge">Team Lead</span>
+             
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="profile-body">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📦</div>
+        <div class="stat-value">{{booking_count}}</div>
+            <div class="stat-label">Total Packages</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">📆</div>
+            <div class="stat-value">{{completed_booking_count}}</div>
+            <div class="stat-label">Packages Today</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">📈</div>
+            <div class="stat-value">99.7%</div>
+            <div class="stat-label">Accuracy Rate</div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon">⏱️</div>
+            <div class="stat-value">47</div>
+            <div class="stat-label">Packages Per Hour</div>
+          </div>
+        </div>
+        
+        <div class="chart-section">
+          <div class="section-header">
+            <h2 class="section-title">Package Volume Trend</h2>
+            <div class="time-filter">
+              <button class="filter-btn">Day</button>
+              <button class="filter-btn active">Week</button>
+              <button class="filter-btn">Month</button>
+            </div>
+          </div>
+          
+          <div class="chart-container">
+            <div class="bar-chart">
+              <div class="bar-group">
+                <div class="bar" style="height: 120px;"></div>
+                <div class="bar-label">Mon</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar" style="height: 150px;"></div>
+                <div class="bar-label">Tue</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar" style="height: 180px;"></div>
+                <div class="bar-label">Wed</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar" style="height: 140px;"></div>
+                <div class="bar-label">Thu</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar" style="height: 160px;"></div>
+                <div class="bar-label">Fri</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar" style="height: 90px;"></div>
+                <div class="bar-label">Sat</div>
+              </div>
+              <div class="bar-group">
+                <div class="bar" style="height: 60px;"></div>
+                <div class="bar-label">Sun</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="summary-section">
+          <div class="summary-grid">
+            <div class="summary-card">
+              <h3>Package Types</h3>
+              <div class="summary-list">
+                <div class="summary-item">
+                  <div class="summary-icon">📦</div>
+                  <div class="summary-details">
+                    <div class="summary-title">Standard Packages</div>
+                    <div class="summary-desc">Regular size, under 5kg</div>
+                  </div>
+                  <div class="summary-value">14,520</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-icon">🗃️</div>
+                  <div class="summary-details">
+                    <div class="summary-title">Large Packages</div>
+                    <div class="summary-desc">Oversized, 5-20kg</div>
+                  </div>
+                  <div class="summary-value">7,245</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-icon">💼</div>
+                  <div class="summary-details">
+                    <div class="summary-title">Express Packages</div>
+                    <div class="summary-desc">Priority shipping</div>
+                  </div>
+                  <div class="summary-value">2,602</div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="summary-card">
+              <h3>Recent Performance</h3>
+              <div class="summary-list">
+                <div class="summary-item">
+                  <div class="summary-icon" style="background-color: #d1fae5; color: #047857;">↗️</div>
+                  <div class="summary-details">
+                    <div class="summary-title">Efficiency Rate</div>
+                    <div class="summary-desc">3% increase from last month</div>
+                  </div>
+                  <div class="summary-value">95%</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-icon" style="background-color: #d1fae5; color: #047857;">↘️</div>
+                  <div class="summary-details">
+                    <div class="summary-title">Error Rate</div>
+                    <div class="summary-desc">Down 1.2% from last month</div>
+                  </div>
+                  <div class="summary-value">0.3%</div>
+                </div>
+                <div class="summary-item">
+                  <div class="summary-icon" style="background-color: #d1fae5; color: #047857;">⭐</div>
+                  <div class="summary-details">
+                    <div class="summary-title">Quality Rating</div>
+                    <div class="summary-desc">Top 5% of all packagers</div>
+                  </div>
+                  <div class="summary-value">4.9/5</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</body>
+
+
+
+
+
+{% endblock %}

@@ -1,0 +1,353 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Admin Users{% endblock %}
+
+{% block content %}
+
+
+
+<div class="tour-packages-container">
+    <header class="packages-header">
+        <h1 class="packages-title">USER MANAGEMENT </h1> 
+    </header>
+</div>
+
+
+
+
+
+<div class="container-fluid">
+
+
+
+            <!-- Stats Cards -->
+            <div class="row justify-content-center">  
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-primary shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">TOTAL USERS</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_users }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-users fa-2x text-primary"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-success shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-danger text-uppercase mb-1"> ADMIN</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ admin_count }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-shield fa-2x text-danger"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-3 col-md-6 mb-4">
+                    <div class="card border-left-info shadow h-100 py-2">
+                        <div class="card-body">
+                            <div class="row no-gutters align-items-center">
+                                <div class="col mr-2">
+                                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">PACKAGERS</div>
+                                    <div class="h5 mb-0 font-weight-bold text-gray-800">{{ packager_count }}</div>
+                                </div>
+                                <div class="col-auto">
+                                    <i class="fas fa-user-tie fa-2x text-info"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+          
+            </div>
+
+
+
+
+
+
+
+
+    
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="filters mb-4">
+                <form method="get" class="filter-form" id="userFilterForm">
+                    <div class="row align-items-end">
+                        <div class="col-md-4 mb-3 mb-md-0">
+                            <label for="search" class="form-label">Search</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="fas fa-search"></i></span>
+                                <input type="text" class="form-control" id="search" name="search" 
+                                       placeholder="Name, email or ID...">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" name="role">
+                                <option value="">All Roles</option>
+                                <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admin</option>
+                                <option value="user" {% if role_filter == 'user' %}selected{% endif %}>User</option>
+                                <option value="packager" {% if role_filter == 'packager' %}selected{% endif %}>Packager</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3 mb-3 mb-md-0">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="">All Statuses</option>
+                                <option value="active">Active</option>
+                                <option value="inactive">Inactive</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-2">
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary filter-btn">
+                                    <i class="fas fa-filter"></i> Filter
+                                </button>
+                                {% if request.GET %}
+                                <a href="{% url 'admin_users' %}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Clear
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-hover users-table align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th width="40">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="selectAllUsers">
+                                </div>
+                            </th>
+                            <th width="60">ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Date Joined</th>
+                            <th>Last Login</th>
+                            <th>Status</th>
+                            <th width="150">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="form-check">
+                                    <input class="form-check-input user-select-checkbox" type="checkbox" 
+                                           value="{{ user.id }}" id="user-{{ user.id }}">
+                                </div>
+                            </td>
+                            <td><span class="user-id">#{{ user.id }}</span></td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="user-avatar me-2">
+                                        {% if user.avatar %}
+                                        <img src="{{ user.avatar.url }}" alt="{{ user.get_full_name }}" class="avatar-img">
+                                        {% else %}
+                                        <div class="avatar-placeholder">{{ user.get_initials }}</div>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="user-name">{{ user.get_full_name }}</div>
+                                        <div class="user-username text-muted small">@{{ user.username }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ user.email }}</td>
+                            <td>
+                                <span class="badge bg-light text-dark">{{ user.get_role_display }}</span>
+                            </td>
+                            <td>{{ user.date_joined|date:"M d, Y" }}</td>
+                            <td>
+                                {% if user.last_login %}
+                                <span data-bs-toggle="tooltip" title="{{ user.last_login|date:'M d, Y H:i' }}">
+                                    {{ user.last_login|timesince }} ago
+                                </span>
+                                {% else %}
+                                <span class="text-muted">Never</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                <span class="status-badge status-active">Active</span>
+                                {% else %}
+                                <span class="status-badge status-inactive">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="#" class="btn btn-sm btn-outline-secondary"
+                                       data-bs-toggle="tooltip" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="" class="btn btn-sm btn-outline-primary"
+                                       data-bs-toggle="tooltip" title="Edit User">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" 
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">More Actions</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="">
+                                                <i class="fas fa-sign-in-alt me-2"></i> Login as User
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="mailto:{{ user.email }}">
+                                                <i class="fas fa-envelope me-2"></i> Send Email
+                                            </a>
+                                        </li>
+                                        {% if user.is_active %}
+                                        <li>
+                                            <button class="dropdown-item text-warning status-toggle-btn" 
+                                                    data-user-id="{{ user.id }}" data-action="deactivate">
+                                                <i class="fas fa-ban me-2"></i> Deactivate
+                                            </button>
+                                        </li>
+                                        {% else %}
+                                        <li>
+                                            <button class="dropdown-item text-success status-toggle-btn" 
+                                                    data-user-id="{{ user.id }}" data-action="activate">
+                                                <i class="fas fa-check-circle me-2"></i> Activate
+                                            </button>
+                                        </li>
+                                        {% endif %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <button class="dropdown-item text-danger delete-user-btn" 
+                                                    data-user-id="{{ user.id }}" data-user-name="{{ user.get_full_name }}">
+                                                <i class="fas fa-trash-alt me-2"></i> Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="9" class="text-center py-5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon">
+                                        <i class="fas fa-users-slash"></i>
+                                    </div>
+                                    <h3>No users found</h3>
+                                    <p class="text-muted">
+                                        {% if request.GET %}
+                                        No users match your current filter criteria.
+                                        <a href="{% url 'admin_users' %}">Clear all filters</a>
+                                        {% else %}
+                                        There are no users in the system yet.
+                                        <a href="{% url 'admin_user_add' %}">Add your first user</a>
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete User Modal -->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm User Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete user <strong id="deleteUserName"></strong>? This action cannot be undone.</p>
+                <p class="text-danger"><strong>Warning:</strong> All data associated with this user will be permanently removed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteUserForm" method="post" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Delete User</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    // Initialize tooltips
+    $('[data-bs-toggle="tooltip"]').tooltip();
+    
+    // Delete user modal handling
+    $('.delete-user-btn').click(function() {
+        var userId = $(this).data('user-id');
+        var userName = $(this).data('user-name');
+        var deleteUrl = "{% url 'admin_user_delete' 0 %}".replace('0', userId);
+        
+        $('#deleteUserName').text(userName);
+        $('#deleteUserForm').attr('action', deleteUrl);
+        $('#deleteUserModal').modal('show');
+    });
+    
+    // Status toggle buttons
+    $('.status-toggle-btn').click(function() {
+        var userId = $(this).data('user-id');
+        var action = $(this).data('action');
+        var url = "{% url 'admin_user_toggle_status' 0 %}".replace('0', userId);
+        
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                'action': action,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(response) {
+                if (response.success) {
+                    location.reload();
+                } else {
+                    alert('Error: ' + response.message);
+                }
+            }
+        });
+    });
+    
+    // Select all checkbox
+    $('#selectAllUsers').change(function() {
+        $('.user-select-checkbox').prop('checked', $(this).prop('checked'));
+    });
+    
+    // Export users button
+    $('#exportUsersBtn').click(function() {
+        var params = new URLSearchParams(window.location.search);
+        window.location.href = '{% url "admin_users_export" %}?' + params.toString();
+    });
+});
+</script>
+{% endblock %}

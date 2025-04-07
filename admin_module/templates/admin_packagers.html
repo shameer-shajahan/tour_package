@@ -1,0 +1,240 @@
+{% extends "admin_base.html" %}
+
+{% block title %}Packager List{% endblock %}
+
+{% block content %}
+
+<div class="tour-packages-container">
+    <header class="packages-header">
+        <h1 class="packages-title">PACKAGER MANAGEMENT</h1> 
+    </header>
+</div>
+<div class="container-fluid">
+
+    <!-- Filter Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Filters</h6>
+        </div>
+        <div class="card-body">
+            <form method="get">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="search">Search</label>
+                            <input type="text" class="form-control" id="search" name="search" 
+                                   value="{{ request.GET.search }}" placeholder="Name, email or phone...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="verified">Verification Status</label>
+                            <select class="form-control" id="verified" name="verified">
+                                <option value="">All</option>
+                                <option value="true" {% if request.GET.verified == 'true' %}selected{% endif %}>Verified</option>
+                                <option value="false" {% if request.GET.verified == 'false' %}selected{% endif %}>Unverified</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 align-self-end">
+                        <button type="submit" class="btn btn-primary btn-block">Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Packagers List Card -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">Packager List</h6>
+            <div>
+                <span class="badge badge-primary">Total: {{ total_packagers }}</span>
+                <span class="badge badge-success ml-2">Verified: {{ verified_count }}</span>
+                <span class="badge badge-warning ml-2">Unverified: {{ unverified_count }}</span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th width="5%">ID</th>
+                            <th width="25%">Packager</th>
+                            <th width="20%">Contact</th>
+                            <th width="20%">Location</th>
+                            <th width="15%">Status</th>
+                            <th width="15%">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for packager in packagers %}
+                        <tr>
+                            <td>#{{ packager.id }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if packager.user.avatar %}
+                                    <img class="rounded-circle mr-2" src="{{ packager.user.avatar.url }}" width="40" height="40">
+                                    {% else %}
+                                    <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center mr-2" 
+                                         style="width: 40px; height: 40px;">
+                                        {{ packager.user.first_name|first }}{{ packager.user.last_name|first }}
+                                    </div>
+                                    {% endif %}
+                                    <div>
+                                        <div>{{ packager.user.get_full_name }}</div>
+                                        <small class="text-muted">@{{ packager.user.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div>{{ packager.user.email }}</div>
+                                <small class="text-muted">{{ packager.contact_phone |default:"No phone" }}</small>
+                            </td>
+                            <td>
+                                {% if packager.location %}
+                                {{ packager.location }}
+                                {% else %}
+                                <span class="text-muted">Not specified</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if packager.is_verified %}
+                                <span class="badge badge-success">Verified</span>
+                                {% else %}
+                                <span class="badge badge-warning">Unverified</span>
+                                {% endif %}
+                                <br>
+                                {% if packager.user.is_active %}
+                                <span class="badge badge-primary">Active</span>
+                                {% else %}
+                                <span class="badge badge-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="btn-group">
+                                    <a href="#" class="btn btn-sm btn-outline-secondary"
+                                       data-bs-toggle="tooltip" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="" class="btn btn-sm btn-outline-primary"
+                                       data-bs-toggle="tooltip" title="Edit User">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle dropdown-toggle-split" 
+                                            data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="visually-hidden">More Actions</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li>
+                                            <a class="dropdown-item" href="">
+                                                <i class="fas fa-sign-in-alt me-2"></i> Login as User
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="mailto:{{ user.email }}">
+                                                <i class="fas fa-envelope me-2"></i> Send Email
+                                            </a>
+                                        </li>
+                                        {% if user.is_active %}
+                                        <li>
+                                            <button class="dropdown-item text-warning status-toggle-btn" 
+                                                    data-user-id="{{ user.id }}" data-action="deactivate">
+                                                <i class="fas fa-ban me-2"></i> Deactivate
+                                            </button>
+                                        </li>
+                                        {% else %}
+                                        <li>
+                                            <button class="dropdown-item text-success status-toggle-btn" 
+                                                    data-user-id="{{ user.id }}" data-action="activate">
+                                                <i class="fas fa-check-circle me-2"></i> Activate
+                                            </button>
+                                        </li>
+                                        {% endif %}
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <button class="dropdown-item text-danger delete-user-btn" 
+                                                    data-user-id="{{ user.id }}" data-user-name="{{ user.get_full_name }}">
+                                                <i class="fas fa-trash-alt me-2"></i> Delete
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4">
+                                <i class="fas fa-user-tie fa-3x text-gray-400 mb-3"></i>
+                                <h5>No packagers found</h5>
+                                <p class="text-muted">
+                                    {% if request.GET %}
+                                    No packagers match your search criteria
+                                    {% else %}
+                                    There are no packagers in the system yet
+                                    {% endif %}
+                                </p>
+                                <a href="{% url 'add_packager' %}" class="btn btn-primary mt-2">
+                                    <i class="fas fa-plus"></i> Add New Packager
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <!-- Pagination -->
+                {% if packagers.has_other_pages %}
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center mt-4">
+                        {% if packagers.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.verified %}&verified={{ request.GET.verified }}{% endif %}" 
+                               aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ packagers.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.verified %}&verified={{ request.GET.verified }}{% endif %}" 
+                               aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                        
+                        {% for num in packagers.paginator.page_range %}
+                            {% if packagers.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > packagers.number|add:'-3' and num < packagers.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.verified %}&verified={{ request.GET.verified }}{% endif %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if packagers.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ packagers.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.verified %}&verified={{ request.GET.verified }}{% endif %}" 
+                               aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ packagers.paginator.num_pages }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.verified %}&verified={{ request.GET.verified }}{% endif %}" 
+                               aria-label="Last">
+                                <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

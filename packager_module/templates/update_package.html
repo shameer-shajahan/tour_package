@@ -1,0 +1,349 @@
+{% extends 'packager_base.html' %}
+
+{% block title %}Update Package{% endblock %}
+
+{% block content %}
+
+{%load static%}
+
+<body>
+    <div class="tour-packages-container">
+        <header class="packages-header">
+            <h1 class="packages-title">UPDATE TOUR PACKAGE</h1>
+            <p class="packages-subtitle">Modify your adventure package by updating the details below</p>
+        </header>
+    </div>
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --accent-color: #e74c3c;
+            --accent-dark: #c0392b;
+            --text-color: #333;
+            --text-light: #666;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 5px 20px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+    
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+    
+        .tour-packages-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+    
+        .packages-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    
+        .packages-title {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 12px;
+            position: relative;
+            display: inline-block;
+        }
+    
+        .packages-title:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+    
+        .packages-subtitle {
+            font-size: 18px;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 20px auto 0;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .form_section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+        
+        .form_group {
+            margin-bottom: 25px;
+        }
+        
+        .form_label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .form_input, .form_textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form_input:focus, .form_textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .form_textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .price_duration {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .image_upload {
+            border: 2px dashed #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .image_upload:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .image_upload img {
+            max-width: 150px;
+            margin-bottom: 15px;
+        }
+        
+        .image_upload_text {
+            color: var(--text-light);
+        }
+        
+        .current_image {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .current_image img {
+            max-width: 100px;
+            max-height: 100px;
+            border-radius: 5px;
+        }
+        
+        .submit_btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: block;
+            margin: 30px auto 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .submit_btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .cancel_btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: block;
+            margin: 10px auto;
+            width: 100%;
+            max-width: 300px;
+            text-align: center;
+            text-decoration: none;
+        }
+        
+        .cancel_btn:hover {
+            background-color: #5a6268;
+        }
+        
+        .button_group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+        
+        .button_group .submit_btn, 
+        .button_group .cancel_btn {
+            margin: 0;
+            max-width: 200px;
+        }
+        
+        @media (max-width: 768px) {
+            .price_duration {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .button_group {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .button_group .submit_btn, 
+            .button_group .cancel_btn {
+                max-width: 100%;
+            }
+        }
+    </style>
+    
+    <div class="container">
+        <div class="form_section">
+            <form id="packageForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Package Basic Info -->
+                <div class="form_group">
+                    <label class="form_label" for="name">Package name</label>
+                    <input class="form_input" type="text" id="name" name="name" placeholder="e.g. Whitewater Rafting" value="{{ package.name }}" required>
+                </div>
+                
+                <div class="price_duration">
+                    <div class="form_group">
+                        <label class="form_label" for="price">Price ($)*</label>
+                        <input class="form_input" type="number" id="price" name="price" min="1" placeholder="e.g. 199" value="{{ package.price }}" required>
+                    </div>
+                    
+                    <div class="form_group">
+                        <label class="form_label" for="duration">Duration*</label>
+                        <input class="form_input" type="text" id="duration" name="duration" placeholder="e.g. 2 Days" value="{{ package.duration }}" required>
+                    </div>
+                </div>
+                
+                <div class="form_group">
+                    <label class="form_label" for="description">Package Description*</label>
+                    <textarea class="form_textarea" id="description" name="description" placeholder="Describe the package experience, what's included, etc." required>{{ package.description }}</textarea>
+                </div>
+                
+                <!-- Group Size and Location -->
+                <div class="price_duration">
+                    <div class="form_group">
+                        <label class="form_label" for="min_participants">Min Group Size*</label>
+                        <input class="form_input" type="number" id="min_participants" name="min_participants" min="1" placeholder="e.g. 10" value="{{ package.min_participants }}" required>
+                    </div>
+                    
+                    <div class="form_group">
+                        <label class="form_label" for="location">Location*</label>
+                        <input class="form_input" type="text" id="location" name="location" placeholder="e.g. Colorado River, Arizona" value="{{ package.location }}" required>
+                    </div>
+                </div>
+                
+                <!-- Package destinations -->
+                <div class="form_group">
+                    <label class="form_label">Destinations</label>
+                    <textarea class="form_textarea" id="destinations" name="destinations" placeholder="destinations" required>{{ package.destinations }}</textarea>
+                </div>
+                
+                <!-- Package inclusions -->
+                <div class="form_group">
+                    <label class="form_label">Inclusions</label>
+                    <textarea class="form_textarea" id="inclusions" name="inclusions" placeholder="inclusions" required>{{ package.inclusions }}</textarea>
+                </div>
+
+                <!-- Package exclusions -->
+                <div class="form_group">
+                    <label class="form_label">Exclusions</label>
+                    <textarea class="form_textarea" id="exclusions" name="exclusions" placeholder="exclusions" required>{{ package.exclusions }}</textarea>
+                </div>
+
+                <!-- Package itinerary -->
+                <div class="form_group">
+                    <label class="form_label">Itinerary</label>
+                    <textarea class="form_textarea" id="itinerary" name="itinerary" placeholder="itinerary" required>{{ package.itinerary }}</textarea>
+                </div>
+                
+                <!-- Package Image -->
+                <div class="form_group">
+                    <label class="form_label" for="image">Package Image</label>
+                    {% if package.image %}
+                    <div class="current_image">
+                        <img src="{{ package.image.url }}" alt="{{ package.name }}">
+                        <span>Current image: {{ package.image.name }}</span>
+                    </div>
+                    {% endif %}
+                    <div class="image_upload" onclick="document.getElementById('image').click()">
+                        <img src="https://img.freepik.com/free-vector/image-upload-concept-landing-page_23-2148317961.jpg?t=st=1742654672~exp=1742658272~hmac=4a399c1f5ae985bbf5e8555702d0fcec53ceb12ce656957fed041131bfbc5ed5&w=2000" alt="Upload image">
+                        <p class="image_upload_text">Click to upload a new package image (optional)</p>
+                        <input type="file" id="image" name="image" accept="image/*" style="display:none">
+                    </div>
+                    <p class="form_hint">Leave empty to keep current image</p>
+                </div>
+
+                <!-- Button Group -->
+                <div class="button_group">
+                    <a href="{% url 'packager_list' %}" class="cancel_btn">CANCEL</a>
+                    <button type="submit" class="submit_btn">UPDATE PACKAGE</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Display file name when selected
+            const fileInput = document.getElementById('image');
+            fileInput.addEventListener('change', function() {
+                const fileName = this.files[0]?.name;
+                if (fileName) {
+                    const uploadText = document.querySelector('.image_upload_text');
+                    uploadText.textContent = `Selected file: ${fileName}`;
+                }
+            });
+            
+            // Preview image when selected
+            fileInput.onchange = function() {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.querySelector('.image_upload img');
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(this.files[0]);
+            };
+        });
+    </script>
+</body>
+
+{% endblock %}

@@ -1,0 +1,864 @@
+
+{% extends 'packager_base.html' %}
+
+{% block title %}package list{% endblock %}
+
+{% block content %}
+
+{%load static%}
+
+<div class="tour-packages-container">
+    <header class="packages-header">
+        <h1 class="packages-title">Explore Our Adventures</h1>
+        <p class="packages-subtitle">Curated experiences for every traveler - from serene getaways to thrilling expeditions</p>
+    </header>
+    
+    <div class="packages-filter">
+        <button class="filter-btn active">All Tours</button>
+        <button class="filter-btn">Adventure</button>
+        <button class="filter-btn">Cultural</button>
+        <button class="filter-btn">Beach</button>
+        <button class="filter-btn">Mountain</button>
+    </div>
+    
+    <div class="packages-grid">
+        {% for p in data %}
+        <div class="package-card" data-category="all">
+            <div class="package-image-container">
+                {% if p.image %}
+                <img src="{{ p.image.url }}" alt="{{ p.name }}" class="package-image">
+                {% else %}
+                <img src="https://images.unsplash.com/photo-1523381210434-271e8be1f52b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1770&q=80" alt="Default tour image" class="package-image">
+                {% endif %}
+                <div class="package-badge">{{ p.duration }} days</div>
+                <div class="overlay">
+                    <div class="quick-view">Quick View</div>
+                </div>
+            </div>
+            
+            <div class="package-content">
+                <h3 class="package-title">{{ p.name }}</h3>
+                <div class="package-rating">
+                    <span class="stars">★★★★★</span>
+                    <span class="review-count">(24 reviews)</span>
+                </div>
+                <div class="package-price-container">
+                    <span class="package-price">{{ p.price }}</span>
+                    <span class="per-person">per person</span>
+                </div>
+                <p class="package-description">{{ p.description|truncatechars:100 }}</p>
+                
+                <div class="package-features">
+                    <span class="feature"><i class="fas fa-map-marker-alt"></i> Destinations: {{p.location}}</span>
+                    <span class="feature"><i class="fas fa-users"></i> Group size: {{p.min_participants  }}</span>
+                    <span class="feature"><i class="fas fa-utensils"></i> Meals included</span>
+                </div>
+                
+                <div class="package-actions">
+                    <a href="{% url 'package_detail' p.id %}" class="btn-view">View Details</a>
+                    {% if user.packager %}
+                    <a href="{% url 'delete_package' p.id %}" class="btn-delete" onclick="return confirmDelete(event, '{{ p.name }}')">
+                        Delete <i class="fas fa-trash"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    {% if user.packager %}
+    <div class="admin-actions">
+        <a href="{% url 'upload_package' %}" class="btn-add">
+            <i class="fas fa-plus"></i> Add New Package
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div class="modal-header">
+                <h2>Confirm Deletion</h2>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete <span id="packageName"></span>?</p>
+                <p class="warning"><i class="fas fa-exclamation-triangle"></i> This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelDelete" class="btn-cancel">Cancel</button>
+                <button id="confirmDelete" class="btn-confirm">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<style>
+    :root {
+        --primary-color: #3f51b5; /* Modern indigo */
+        --primary-dark: #303f9f;
+        --primary-light: #e8eaf6;
+        --accent-color: #ff4081; /* Vibrant pink */
+        --accent-dark: #f50057;
+        --accent-light: #ff80ab;
+        --text-color: #263238; /* Deep blue grey */
+        --text-light: #607d8b;
+        --bg-color: #f5f7fa;
+        --card-bg: #ffffff;
+        --shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+        background-color: var(--bg-color);
+        color: var(--text-color);
+    }
+
+    .tour-packages-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 70px 30px;
+    }
+
+    .packages-header {
+        text-align: center;
+        margin-bottom: 60px;
+        position: relative;
+        animation: slideDown 0.8s ease forwards;
+    }
+
+    @keyframes slideDown {
+        from { 
+            opacity: 0; 
+            transform: translateY(-30px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+
+    .packages-title {
+        font-size: 46px;
+        font-weight: 800;
+        color: var(--text-color);
+        margin-bottom: 15px;
+        position: relative;
+        display: inline-block;
+        letter-spacing: -0.5px;
+        background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+        background-clip: text;
+        -webkit-background-clip: text;
+        color: transparent;
+        text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
+    }
+
+    .packages-title:after {
+        content: '';
+        position: absolute;
+        width: 100px;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-radius: 4px;
+    }
+
+    .packages-subtitle {
+        font-size: 18px;
+        color: var(--text-light);
+        max-width: 700px;
+        margin: 25px auto 0;
+        line-height: 1.7;
+        animation-delay: 0.2s;
+    }
+
+    .packages-filter {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 50px;
+        flex-wrap: wrap;
+        animation: fadeIn 0.8s ease forwards;
+        animation-delay: 0.3s;
+        opacity: 0;
+    }
+
+    .filter-btn {
+        padding: 12px 24px;
+        background: transparent;
+        border: 2px solid var(--primary-color);
+        border-radius: 30px;
+        color: var(--primary-color);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 15px;
+        outline: none;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .filter-btn:before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        background: rgba(63, 81, 181, 0.1);
+        border-radius: 50%;
+        transform: translate(-50%, -50%);
+        transition: width 0.6s ease, height 0.6s ease;
+    }
+
+    .filter-btn:hover:before {
+        width: 300px;
+        height: 300px;
+    }
+
+    .filter-btn.active, .filter-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(63, 81, 181, 0.3);
+    }
+
+    .packages-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 40px;
+    }
+
+    .package-card {
+        background: var(--card-bg);
+        border-radius: 20px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: var(--transition);
+        position: relative;
+        border: 1px solid rgba(0,0,0,0.03);
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.7s ease forwards;
+    }
+
+    .package-card:nth-child(2) {
+        animation-delay: 0.15s;
+    }
+
+    .package-card:nth-child(3) {
+        animation-delay: 0.3s;
+    }
+
+    .package-card:nth-child(4) {
+        animation-delay: 0.45s;
+    }
+
+    .package-card:nth-child(5) {
+        animation-delay: 0.6s;
+    }
+
+    .package-card:nth-child(6) {
+        animation-delay: 0.75s;
+    }
+
+    @keyframes fadeInUp {
+        from { 
+            opacity: 0; 
+            transform: translateY(30px); 
+        }
+        to { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
+    }
+
+    .package-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 25px 40px rgba(0,0,0,0.15);
+    }
+
+    .package-image-container {
+        position: relative;
+        height: 240px;
+        overflow: hidden;
+    }
+
+    .package-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    .package-card:hover .package-image {
+        transform: scale(1.15);
+    }
+
+    .overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 60%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .package-card:hover .overlay {
+        opacity: 1;
+    }
+
+    .quick-view {
+        background: var(--accent-color);
+        color: white;
+        padding: 10px 22px;
+        border-radius: 30px;
+        font-weight: 600;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.4s ease 0.1s;
+        cursor: pointer;
+        box-shadow: 0 5px 15px rgba(255, 64, 129, 0.4);
+    }
+
+    .package-card:hover .quick-view {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .package-badge {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: var(--accent-color);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 30px;
+        font-size: 14px;
+        font-weight: 600;
+        box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+        backdrop-filter: blur(5px);
+        z-index: 2;
+        transform: translateY(-5px);
+        animation: floatBadge 5s ease-in-out infinite;
+    }
+
+    @keyframes floatBadge {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+
+    .package-content {
+        padding: 30px;
+        position: relative;
+    }
+
+    .package-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: var(--text-color);
+        letter-spacing: -0.3px;
+        transition: var(--transition);
+    }
+
+    .package-card:hover .package-title {
+        color: var(--primary-color);
+    }
+
+    .package-rating {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .stars {
+        color: #ffab00;
+        margin-right: 8px;
+        letter-spacing: 2px;
+    }
+
+    .review-count {
+        font-size: 14px;
+        color: var(--text-light);
+    }
+
+    .package-price-container {
+        display: flex;
+        align-items: baseline;
+        margin-bottom: 18px;
+    }
+
+    .package-price {
+        font-size: 30px;
+        font-weight: 800;
+        color: var(--primary-color);
+        margin-right: 8px;
+        position: relative;
+        display: inline-block;
+    }
+
+    .package-price:after {
+        content: '';
+        position: absolute;
+        height: 2px;
+        width: 0;
+        bottom: 0;
+        left: 0;
+        background: var(--accent-color);
+        transition: width 0.4s ease;
+    }
+
+    .package-card:hover .package-price:after {
+        width: 100%;
+    }
+
+    .per-person {
+        font-size: 15px;
+        color: var(--text-light);
+        font-weight: 500;
+    }
+
+    .package-description {
+        font-size: 15px;
+        line-height: 1.7;
+        color: var(--text-light);
+        margin-bottom: 25px;
+    }
+
+    .package-features {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 25px;
+        background: linear-gradient(135deg, var(--primary-light) 0%, rgba(232, 234, 246, 0.2) 100%);
+        padding: 18px;
+        border-radius: 12px;
+        transition: var(--transition);
+    }
+
+    .package-card:hover .package-features {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.05);
+    }
+
+    .feature {
+        font-size: 14px;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        transition: transform 0.3s ease;
+    }
+
+    .feature:hover {
+        transform: translateX(5px);
+    }
+
+    .feature i {
+        margin-right: 10px;
+        color: var(--accent-color);
+        font-size: 16px;
+        transition: transform 0.3s ease;
+    }
+
+    .feature:hover i {
+        transform: scale(1.2);
+    }
+
+    .package-actions {
+        display: flex;
+        gap: 15px;
+    }
+
+    .btn-view {
+        display: inline-block;
+        padding: 15px 26px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--transition);
+        flex-grow: 1;
+        text-align: center;
+        letter-spacing: 0.5px;
+        box-shadow: 0 8px 20px rgba(63, 81, 181, 0.25);
+        border: none;
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+
+    .btn-view:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: all 0.6s ease;
+    }
+
+    .btn-view:hover:before {
+        left: 100%;
+    }
+
+    .btn-view:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 25px rgba(63, 81, 181, 0.35);
+        background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
+    }
+
+    .btn-delete {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px 20px;
+        background-color: #f44336;
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--transition);
+        box-shadow: 0 8px 15px rgba(244, 67, 54, 0.2);
+    }
+
+    .btn-delete i {
+        margin-left: 8px;
+        transition: transform 0.3s ease;
+    }
+
+    .btn-delete:hover {
+        background-color: #d32f2f;
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(244, 67, 54, 0.3);
+    }
+
+    .btn-delete:hover i {
+        transform: rotate(15deg);
+    }
+
+    .admin-actions {
+        display: flex;
+        justify-content: center;
+        margin-top: 60px;
+        animation: fadeIn 1s ease forwards;
+        animation-delay: 0.8s;
+        opacity: 0;
+    }
+
+    .btn-add {
+        display: inline-flex;
+        align-items: center;
+        padding: 16px 30px;
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: var(--transition);
+        box-shadow: 0 10px 20px rgba(76, 175, 80, 0.25);
+    }
+
+    .btn-add:hover {
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 15px 30px rgba(76, 175, 80, 0.35);
+    }
+
+    .btn-add i {
+        margin-right: 10px;
+        font-size: 18px;
+        transition: transform 0.4s ease;
+    }
+
+    .btn-add:hover i {
+        transform: rotate(90deg);
+    }
+
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(5px);
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 15px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        animation: modalScale 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+        overflow: hidden;
+    }
+
+    @keyframes modalScale {
+        from {opacity: 0; transform: scale(0.8);}
+        to {opacity: 1; transform: scale(1);}
+    }
+
+    .modal-header {
+        padding: 25px;
+        border-bottom: 1px solid #eee;
+        position: relative;
+    }
+
+    .modal-header h2 {
+        margin: 0;
+        color: var(--text-color);
+        font-size: 24px;
+    }
+
+    .modal-body {
+        padding: 25px;
+    }
+
+    .modal-body p {
+        margin-bottom: 20px;
+        font-size: 16px;
+        line-height: 1.7;
+    }
+
+    .warning {
+        color: #f44336;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        background: rgba(244, 67, 54, 0.05);
+        border-radius: 8px;
+        border-left: 3px solid #f44336;
+    }
+
+    .warning i {
+        margin-right: 10px;
+        font-size: 18px;
+    }
+
+    .modal-footer {
+        padding: 20px 25px;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: flex-end;
+        gap: 15px;
+    }
+
+    .btn-cancel, .btn-confirm {
+        padding: 12px 25px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        border: none;
+    }
+
+    .btn-cancel {
+        background-color: #e0e0e0;
+        color: #555;
+    }
+
+    .btn-cancel:hover {
+        background-color: #ccc;
+        transform: translateY(-2px);
+    }
+
+    .btn-confirm {
+        background-color: #f44336;
+        color: white;
+        box-shadow: 0 5px 15px rgba(244, 67, 54, 0.3);
+    }
+
+    .btn-confirm:hover {
+        background-color: #d32f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(244, 67, 54, 0.4);
+    }
+
+    .close-modal {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #aaa;
+        cursor: pointer;
+        height: 30px;
+        width: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #f5f5f5;
+        transition: all 0.3s ease;
+    }
+
+    .close-modal:hover {
+        background: #e0e0e0;
+        color: #555;
+        transform: rotate(90deg);
+    }
+
+    /* Animation keyframes */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 992px) {
+        .packages-grid {
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .packages-title {
+            font-size: 38px;
+        }
+        
+        .packages-subtitle {
+            font-size: 16px;
+        }
+        
+        .tour-packages-container {
+            padding: 40px 20px;
+        }
+
+        .package-actions {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .packages-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .package-card {
+            max-width: 100%;
+        }
+        
+        .packages-title {
+            font-size: 32px;
+        }
+        
+        .package-content {
+            padding: 25px;
+        }
+        
+        .filter-btn {
+            padding: 10px 18px;
+            font-size: 14px;
+        }
+    }
+
+
+</style>
+
+
+<script>
+function confirmDelete(event, packageName) {
+    event.preventDefault();
+    
+    const deleteLink = event.target.closest('a');
+    const modal = document.getElementById('deleteModal');
+    const packageNameSpan = document.getElementById('packageName');
+    const confirmButton = document.getElementById('confirmDelete');
+    const cancelButton = document.getElementById('cancelDelete');
+    const closeModal = document.querySelector('.close-modal');
+    
+    packageNameSpan.textContent = packageName;
+    modal.style.display = 'flex';
+    
+    confirmButton.onclick = function() {
+        window.location.href = deleteLink.href;
+    };
+    
+    cancelButton.onclick = function() {
+        modal.style.display = 'none';
+    };
+    
+    closeModal.onclick = function() {
+        modal.style.display = 'none';
+    };
+    
+    window.onclick = function(event) {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+        }
+    };
+    
+    return false;
+}
+
+// Filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Add animation to package cards
+            const cards = document.querySelectorAll('.package-card');
+            cards.forEach((card, index) => {
+                card.style.animation = 'none';
+                card.offsetHeight; // Trigger reflow
+                card.style.animation = `fadeInUp 0.5s ease forwards ${index * 0.1}s`;
+                card.style.opacity = '0';
+            });
+        });
+    });
+    
+    // Quick View functionality
+    const quickViewButtons = document.querySelectorAll('.quick-view');
+    quickViewButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const card = this.closest('.package-card');
+            const viewDetailsLink = card.querySelector('.btn-view').href;
+            window.location.href = viewDetailsLink;
+        });
+    });
+});
+</script>
+
+{% endblock %}
+

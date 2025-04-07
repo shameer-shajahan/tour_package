@@ -1,0 +1,125 @@
+
+{% extends "admin_base.html" %}
+
+{% block title %}Booking Detail #{{ booking.id }}{% endblock %}
+
+{% block content %}
+<div class="booking-detail-container">
+    <div class="back-link">
+        <a href="{% url 'admin_bookings' %}">&larr; Back to all bookings</a>
+    </div>
+    
+    <h1>Booking Detail #{{ booking.id }}</h1>
+    
+    <div class="booking-status">
+        <span class="status-badge status-{{ booking.status }}">{{ booking.status }}</span>
+        
+        <div class="status-actions">
+            {% if booking.status == 'pending' %}
+            <a href="#" class="btn btn-confirm">Confirm Booking</a>
+            {% endif %}
+            {% if booking.status != 'cancelled' and booking.status != 'completed' %}
+            <a href="#" class="btn btn-cancel">Cancel Booking</a>
+            {% endif %}
+            {% if booking.status == 'confirmed' %}
+            <a href="#" class="btn btn-complete">Mark as Completed</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="detail-sections">
+        <div class="detail-section">
+            <h2>Customer Information</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="label">Name:</span>
+                    <span class="value">{{ booking.customer_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Email:</span>
+                    <span class="value">{{ booking.customer_email }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Phone:</span>
+                    <span class="value">{{ booking.customer_phone }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Address:</span>
+                    <span class="value">{{ booking.customer_address }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h2>Package Information</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="label">Package:</span>
+                    <span class="value">{{ booking.package_name }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Duration:</span>
+                    <span class="value">{{ booking.package_duration }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Date:</span>
+                    <span class="value">{{ booking.booking_date }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Time:</span>
+                    <span class="value">{{ booking.booking_time }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h2>Payment Information</h2>
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="label">Amount:</span>
+                    <span class="value">${{ booking.amount }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Payment Method:</span>
+                    <span class="value">{{ booking.payment_method }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Payment Status:</span>
+                    <span class="value status-badge status-{{ booking.payment_status }}">{{ booking.payment_status }}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="label">Transaction ID:</span>
+                    <span class="value">{{ booking.transaction_id }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="detail-section">
+            <h2>Additional Information</h2>
+            <div class="detail-notes">
+                <p>{{ booking.notes }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="booking-history">
+        <h2>Booking History</h2>
+        <ul class="history-timeline">
+            {% for event in booking_history %}
+            <li class="history-item">
+                <div class="history-time">{{ event.timestamp }}</div>
+                <div class="history-content">
+                    <div class="history-title">{{ event.action }}</div>
+                    <div class="history-user">by {{ event.user }}</div>
+                    {% if event.notes %}
+                    <div class="history-notes">{{ event.notes }}</div>
+                    {% endif %}
+                </div>
+            </li>
+            {% empty %}
+            <li class="history-item empty">No history available</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

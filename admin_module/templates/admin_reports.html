@@ -1,0 +1,174 @@
+<!-- admin_reports.html -->
+{% extends "admin_base.html" %}
+
+{% block title %}Admin Reports{% endblock %}
+
+{% block content %}
+<div class="reports-container">
+    <h1>Reports & Analytics</h1>
+    
+    <div class="report-filters">
+        <form method="get" class="filter-form">
+            <div class="form-group">
+                <label for="report_type">Report Type</label>
+                <select id="report_type" name="report_type">
+                    <option value="bookings" {% if request.GET.report_type == 'bookings' %}selected{% endif %}>Bookings</option>
+                    <option value="revenue" {% if request.GET.report_type == 'revenue' %}selected{% endif %}>Revenue</option>
+                    <option value="packages" {% if request.GET.report_type == 'packages' %}selected{% endif %}>Package Performance</option>
+                    <option value="customers" {% if request.GET.report_type == 'customers' %}selected{% endif %}>Customer Analytics</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="date_range">Date Range</label>
+                <select id="date_range" name="date_range">
+                    <option value="7days" {% if request.GET.date_range == '7days' %}selected{% endif %}>Last 7 Days</option>
+                    <option value="30days" {% if request.GET.date_range == '30days' %}selected{% endif %}>Last 30 Days</option>
+                    <option value="90days" {% if request.GET.date_range == '90days' %}selected{% endif %}>Last 90 Days</option>
+                    <option value="year" {% if request.GET.date_range == 'year' %}selected{% endif %}>This Year</option>
+                    <option value="custom" {% if request.GET.date_range == 'custom' %}selected{% endif %}>Custom Range</option>
+                </select>
+            </div>
+            <div class="form-group custom-date-range" {% if request.GET.date_range != 'custom' %}style="display: none;"{% endif %}>
+                <div>
+                    <label for="date_from">From</label>
+                    <input type="date" id="date_from" name="date_from" value="{{ request.GET.date_from }}">
+                </div>
+                <div>
+                    <label for="date_to">To</label>
+                    <input type="date" id="date_to" name="date_to" value="{{ request.GET.date_to }}">
+                </div>
+            </div>
+            <button type="submit" class="btn filter-btn">Generate Report</button>
+        </form>
+    </div>
+    
+    <div class="report-content">
+        {% if report_type == 'bookings' %}
+        <div class="report-section">
+            <h2>Booking Statistics</h2>
+            <div class="chart-container">
+                <!-- Placeholder for chart -->
+                <div class="chart-placeholder">Bookings Chart</div>
+            </div>
+            <div class="report-summary">
+                <div class="summary-item">
+                    <span class="label">Total Bookings:</span>
+                    <span class="value">{{ total_bookings }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Confirmed Bookings:</span>
+                    <span class="value">{{ confirmed_bookings }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Completed Bookings:</span>
+                    <span class="value">{{ completed_bookings }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Cancelled Bookings:</span>
+                    <span class="value">{{ cancelled_bookings }}</span>
+                </div>
+            </div>
+        </div>
+        {% elif report_type == 'revenue' %}
+        <div class="report-section">
+            <h2>Revenue Analysis</h2>
+            <div class="chart-container">
+                <!-- Placeholder for chart -->
+                <div class="chart-placeholder">Revenue Chart</div>
+            </div>
+            <div class="report-summary">
+                <div class="summary-item">
+                    <span class="label">Total Revenue:</span>
+                    <span class="value">${{ total_revenue }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Average per Booking:</span>
+                    <span class="value">${{ avg_booking_value }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Highest Revenue Day:</span>
+                    <span class="value">{{ highest_revenue_day }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Revenue Growth:</span>
+                    <span class="value">{{ revenue_growth }}%</span>
+                </div>
+            </div>
+        </div>
+        {% elif report_type == 'packages' %}
+        <div class="report-section">
+            <h2>Package Performance</h2>
+            <div class="chart-container">
+                <!-- Placeholder for chart -->
+                <div class="chart-placeholder">Packages Chart</div>
+            </div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Package</th>
+                        <th>Bookings</th>
+                        <th>Revenue</th>
+                        <th>Average Rating</th>
+                        <th>Popularity Trend</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for package in package_stats %}
+                    <tr>
+                        <td>{{ package.name }}</td>
+                        <td>{{ package.bookings_count }}</td>
+                        <td>${{ package.revenue }}</td>
+                        <td>{{ package.avg_rating }}</td>
+                        <td>{{ package.trend }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">No package data available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% elif report_type == 'customers' %}
+        <div class="report-section">
+            <h2>Customer Analytics</h2>
+            <div class="chart-container">
+                <!-- Placeholder for chart -->
+                <div class="chart-placeholder">Customer Chart</div>
+            </div>
+            <div class="report-summary">
+                <div class="summary-item">
+                    <span class="label">New Customers:</span>
+                    <span class="value">{{ new_customers }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Returning Customers:</span>
+                    <span class="value">{{ returning_customers }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Average Orders per Customer:</span>
+                    <span class="value">{{ avg_orders_per_customer }}</span>
+                </div>
+                <div class="summary-item">
+                    <span class="label">Customer Retention Rate:</span>
+                    <span class="value">{{ retention_rate }}%</span>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="report-placeholder">
+            <p>Select a report type and date range to generate reports</p>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="export-options">
+        <h3>Export Options</h3>
+        <div class="export-buttons">
+            <a href="#" class="btn btn-export">Export as CSV</a>
+            <a href="#" class="btn btn-export">Export as PDF</a>
+            <a href="#" class="btn btn-export">Export as Excel</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

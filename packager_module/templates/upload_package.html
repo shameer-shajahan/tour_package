@@ -1,0 +1,735 @@
+
+{% extends 'packager_base.html' %}
+
+{% block title %}package list{% endblock %}
+
+{% block content %}
+
+{%load static%}
+
+
+
+
+<body>
+
+
+
+    <div class="tour-packages-container">
+        <header class="packages-header">
+            <h1 class="packages-title">UPLOAD TOUR PACKAGE</h1>
+            <p class="packages-subtitle">Create a new adventure package by filling out the details below</p>
+        </header>
+        
+    </div>
+    
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --accent-color: #e74c3c;
+            --accent-dark: #c0392b;
+            --text-color: #333;
+            --text-light: #666;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 5px 20px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+    
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+    
+        .tour-packages-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+    
+        .packages-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    
+        .packages-title {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 12px;
+            position: relative;
+            display: inline-block;
+        }
+    
+        .packages-title:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+    
+        .packages-subtitle {
+            font-size: 18px;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 20px auto 0;
+        }
+    
+        .packages-filter {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+    
+        .filter-btn {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            border-radius: 30px;
+            color: var(--primary-color);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+    
+        .filter-btn.active, .filter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+    
+        .packages-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+        }
+    
+        .package-card {
+            background: var(--card-bg);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            position: relative;
+        }
+    
+        .package-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+    
+        .package-image-container {
+            position: relative;
+            height: 220px;
+            overflow: hidden;
+        }
+    
+        .package-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+    
+        .package-card:hover .package-image {
+            transform: scale(1.1);
+        }
+    
+        .package-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    
+        .package-content {
+            padding: 25px;
+        }
+    
+        .package-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+    
+        .package-rating {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+    
+        .stars {
+            color: #ffc107;
+            margin-right: 5px;
+        }
+    
+        .review-count {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+    
+        .package-price-container {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 15px;
+        }
+    
+        .package-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-right: 5px;
+        }
+    
+        .per-person {
+            font-size: 14px;
+            color: var(--text-light);
+        }
+    
+        .package-description {
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+    
+        .package-features {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+    
+        .feature {
+            font-size: 14px;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+        }
+    
+        .feature i {
+            margin-right: 5px;
+            color: var(--primary-color);
+        }
+    
+        .package-actions {
+            display: flex;
+            gap: 10px;
+        }
+    
+        .btn-view {
+            display: inline-block;
+            padding: 12px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: var(--transition);
+            flex-grow: 1;
+            text-align: center;
+        }
+    
+        .btn-view:hover {
+            background-color: var(--primary-dark);
+        }
+    
+        .btn-delete {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 12px 20px;
+            background-color: var(--accent-color);
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+    
+        .btn-delete i {
+            margin-left: 8px;
+        }
+    
+        .btn-delete:hover {
+            background-color: var(--accent-dark);
+        }
+    
+        .admin-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 40px;
+        }
+    
+        .btn-add {
+            display: inline-flex;
+            align-items: center;
+            padding: 12px 25px;
+            background-color: #2ecc71;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+    
+        .btn-add:hover {
+            background-color: #27ae60;
+        }
+    
+        .btn-add i {
+            margin-right: 8px;
+        }
+    
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+    
+        .modal-content {
+            background-color: white;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s ease;
+        }
+    
+        @keyframes modalFadeIn {
+            from {opacity: 0; transform: translateY(-50px);}
+            to {opacity: 1; transform: translateY(0);}
+        }
+    
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+        }
+    
+        .modal-header h2 {
+            margin: 0;
+            color: var(--text-color);
+            font-size: 24px;
+        }
+    
+        .modal-body {
+            padding: 20px;
+        }
+    
+        .modal-body p {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+    
+        .warning {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+    
+        .warning i {
+            margin-right: 5px;
+        }
+    
+        .modal-footer {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    
+        .btn-cancel, .btn-confirm {
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            border: none;
+        }
+    
+        .btn-cancel {
+            background-color: #e0e0e0;
+            color: #555;
+        }
+    
+        .btn-cancel:hover {
+            background-color: #ccc;
+        }
+    
+        .btn-confirm {
+            background-color: var(--accent-color);
+            color: white;
+        }
+    
+        .btn-confirm:hover {
+            background-color: var(--accent-dark);
+        }
+    
+        .close-modal {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+        }
+    
+        .close-modal:hover {
+            color: #555;
+        }
+    
+        @media (max-width: 992px) {
+            .packages-grid {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+        }
+    
+        @media (max-width: 768px) {
+            .packages-title {
+                font-size: 32px;
+            }
+            
+            .packages-subtitle {
+                font-size: 16px;
+            }
+            
+            .package-actions {
+                flex-direction: column;
+            }
+            
+            .btn-delete, .btn-view {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+            }
+        }
+    
+        @media (max-width: 576px) {
+            .packages-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .package-card {
+                max-width: 100%;
+            }
+        }
+    </style>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Filter functionality
+            const filterButtons = document.querySelectorAll('.filter-btn');
+            const packageCards = document.querySelectorAll('.package-card');
+            
+            filterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const filter = this.dataset.filter;
+                    
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Filter packages
+                    packageCards.forEach(card => {
+                        if (filter === 'all' || card.dataset.category === filter) {
+                            card.style.display = 'block';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Add animation on scroll
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            packageCards.forEach(card => {
+                observer.observe(card);
+            });
+            
+            // Delete modal functionality
+            const modal = document.getElementById('deleteModal');
+            const cancelButton = document.getElementById('cancelDelete');
+            const confirmButton = document.getElementById('confirmDelete');
+            const closeModal = document.getElementsByClassName('close-modal')[0];
+            const packageNameEl = document.getElementById('packageName');
+            
+            let deleteUrl = '';
+            
+            window.confirmDelete = function(event, packageName) {
+                event.preventDefault();
+                deleteUrl = event.target.closest('a').href;
+                packageNameEl.textContent = packageName;
+                modal.style.display = 'flex';
+                return false;
+            };
+            
+            // Close modal functions
+            function closeDeleteModal() {
+                modal.style.display = 'none';
+            }
+            
+            cancelButton.onclick = closeDeleteModal;
+            closeModal.onclick = closeDeleteModal;
+            
+            // Confirm delete action
+            confirmButton.onclick = function() {
+                window.location.href = deleteUrl;
+            };
+            
+            // Close modal when clicking outside
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    closeDeleteModal();
+                }
+            };
+        });
+    </script>
+
+    <div class="container">
+        <div class="form_section">
+            <form id="packageForm" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <!-- Package Basic Info -->
+                <div class="form_group">
+                    <label class="form_label" for="name">Package name</label>
+                    <input class="form_input" type="text" id="name" name="name" placeholder="e.g. Whitewater Rafting" required>
+                </div>
+                
+                <div class="price_duration">
+                    <div class="form_group">
+                        <label class="form_label" for="price">Price ($)*</label>
+                        <input class="form_input" type="number" id="price" name="price" min="1" placeholder="e.g. 199" required>
+                    </div>
+                    
+                    <div class="form_group">
+                        <label class="form_label" for="duration">Duration*</label>
+                        <input class="form_input" type="text" id="duration" name="duration" placeholder="e.g. 2 Days" required>
+                    </div>
+                </div>
+                
+                <div class="form_group">
+                    <label class="form_label" for="description">Package Description*</label>
+                    <textarea class="form_textarea" id="description" name="description" placeholder="Describe the package experience, what's included, etc." required></textarea>
+                </div>
+                
+              
+                <!-- Group Size and Location -->
+                <div class="price_duration">
+                    <div class="form_group">
+                        <label class="form_label" for="min_participants">Min Group Size*</label>
+                        <input class="form_input" type="number" id="min_participants" name="min_participants" min="1" placeholder="e.g. 10" required>
+                    </div>
+                    
+                    <div class="form_group">
+                        <label class="form_label" for="location">Location*</label>
+                        <input class="form_input" type="text" id="location" name="location" placeholder="e.g. Colorado River, Arizona" required>
+                    </div>
+                </div>
+                
+                <!-- Package destinations -->
+                <div class="form_group">
+                    <label class="form_label">destinations</label>
+                    <textarea class="form_textarea" id="destinations" name="destinations" placeholder="destinations" required></textarea>
+                </div>
+                
+                <!-- Package inclusions -->
+                <div class="form_group">
+                    <label class="form_label">Inclusions</label>
+                    <textarea class="form_textarea" id="inclusions" name="inclusions" placeholder="inclusions" required></textarea>
+                </div>
+
+                <!-- Package exclusions -->
+                <div class="form_group">
+                    <label class="form_label">exclusions</label>
+                    <textarea class="form_textarea" id="exclusions" name="exclusions" placeholder="exclusions" required></textarea>
+                </div>
+
+                <!-- Package itinerary -->
+                <div class="form_group">
+                    <label class="form_label">itinerary</label>
+                    <textarea class="form_textarea" id="itinerary" name="itinerary" placeholder="itinerary" required></textarea>
+                </div>
+                
+                <!-- Package Image -->
+                <div class="form_group">
+                    <label class="form_label" for="image">Package Image*</label>
+                    <div class="image_upload_container">
+                        <div class="image_preview" id="imagePreview">
+                            <img id="previewImg" src="https://img.freepik.com/free-vector/image-upload-concept-landing-page_23-2148317961.jpg?t=st=1742654672~exp=1742658272~hmac=4a399c1f5ae985bbf5e8555702d0fcec53ceb12ce656957fed041131bfbc5ed5&w=2000" alt="Image preview">
+                            <div class="upload_overlay">
+                                <i class="fas fa-cloud-upload-alt"></i>
+                                <p>Click or drag image here</p>
+                            </div>
+                        </div>
+                        <input type="file" id="image" name="image" accept="image/*" class="file_input" onChange="previewImage(this)">
+                    </div>
+                    <p class="image_helper">Recommended size: 1200 x 800 pixels (Max: 5MB)</p>
+                </div>
+
+
+
+             <style>
+                /* Improved Image Upload Styles */
+.image_upload_container {
+    position: relative;
+    margin-bottom: 10px;
+}
+
+.image_preview {
+    width: 100%;
+    height: 250px;
+    border: 2px dashed var(--primary-color);
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    position: relative;
+    background-color: #f9f9f9;
+    transition: var(--transition);
+}
+
+.image_preview:hover {
+    border-color: var(--primary-dark);
+    background-color: #f0f0f0;
+}
+
+.image_preview img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.upload_overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    opacity: 0;
+    transition: var(--transition);
+}
+
+.image_preview:hover .upload_overlay {
+    opacity: 1;
+}
+
+.upload_overlay i {
+    font-size: 48px;
+    margin-bottom: 15px;
+}
+
+.file_input {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.image_helper {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 5px;
+}
+
+/* For image with content */
+.has_image .upload_overlay {
+    opacity: 0;
+}
+
+.has_image:hover .upload_overlay {
+    opacity: 1;
+}
+             </style>  
+            <script>
+                function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    const previewImg = document.getElementById('previewImg');
+    
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            previewImg.src = e.target.result;
+            preview.classList.add('has_image');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        previewImg.src = "{% static 'img/upload-placeholder.jpg' %}";
+        preview.classList.remove('has_image');
+    }
+}
+
+// Also make the preview div clickable to trigger file input
+document.addEventListener('DOMContentLoaded', function() {
+    const preview = document.getElementById('imagePreview');
+    const fileInput = document.getElementById('image');
+    
+    preview.addEventListener('click', function() {
+        fileInput.click();
+    });
+});
+            </script>
+
+                <!-- Submit Button -->
+               
+                <button type="submit" class="submit_btn">UPLOAD PACKAGE</button>
+            </form>
+        </div>
+    </div>
+
+
+
+
+
+
+</body>
+
+
+
+
+
+
+{% endblock %}

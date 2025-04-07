@@ -1,0 +1,231 @@
+
+
+
+
+
+
+
+{% extends 'base.html' %}
+
+{% block title %}package list{% endblock %}
+
+{% block content %}
+
+{%load static%}
+<style>
+
+
+:root {
+            --primary-color: #3498db;
+            --primary-dark: #2980b9;
+            --accent-color: #e74c3c;
+            --accent-dark: #c0392b;
+            --text-color: #333;
+            --text-light: #666;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --shadow: 0 5px 20px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+    
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+    
+        .tour-packages-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+            .packages-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    
+        .packages-title {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 12px;
+            position: relative;
+            display: inline-block;
+        }
+    
+        .packages-title:after {
+            content: '';
+            position: absolute;
+            width: 60px;
+            height: 4px;
+            background: var(--primary-color);
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+        .packages-subtitle {
+            font-size: 18px;
+            color: var(--text-light);
+            max-width: 700px;
+            margin: 20px auto 0;
+        }
+    
+        .packages-filter {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+       
+        
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    .confirmed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    .pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    .cancelled {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        color: #333;
+        font-family: Arial, sans-serif;
+        line-height: 1.6;
+    }
+    th, td {
+        padding: 12px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    tr:hover {
+        background-color: #f5f5f5;
+    }
+    .search-box {
+        padding: 10px;
+        margin-bottom: 20px;
+        width: 100%;
+        max-width: 300px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+    .header-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+</style>
+
+
+
+      <!-- space  -->
+
+      <div style="margin-top: 12rem;">
+
+      </div>
+
+
+<body>
+
+    <div class="tour-packages-container">
+        <header class="packages-header">
+            <h1 class="packages-title">Tour Package Bookings</h1>
+            
+        </header>
+   
+    <div class="container">
+    
+        
+        <div class="header-actions">
+            <input type="text" class="search-box" placeholder="Search bookings...">
+            <div>
+                <button onclick="alert('Export feature would go here')">Export List</button>
+            </div>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Customer Name</th>
+                    <th>Package</th>
+                    <th>Travel Dates</th>
+                    <th>Guests</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Confirmation</th>
+                </tr>
+            </thead>
+            <tbody>
+
+     
+    {% for b in bookings %}
+                <tr>
+                    <td>{{ b.booking_id }}</td>
+                    <td>{{ b.user }}</td>
+                    <td>{{ b.tour_package }}</td>
+                    <td>{{ b.travel_date }}</td>
+                    <td>{{ b.num_travelers }}</td>
+                    <td>{{b.total_price }}</td>
+                    <td><span class="status-badge {{ booking.status }}">{{ b.booking_status }}</span></td> 
+                    <td>
+                        <a href="{% url 'delete_booking' b.id %}" class="btn btn-danger btn-sm">Cancel</a>
+                        <a href="{% url 'card_input' b.id %}" class="btn btn-success btn-sm">Pay</a>
+                    </td>
+                </tr>
+    
+
+
+                {% endfor %}
+            
+           
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Simple search functionality
+        document.querySelector('.search-box').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const tableRows = document.querySelectorAll('tbody tr');
+            
+            tableRows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                if(rowText.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+
+
+{% endblock %}
+
