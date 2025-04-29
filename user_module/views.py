@@ -387,4 +387,91 @@ def refund(request):
     
     return render(request, 'refund.html')
 
+# views.py
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.contrib.auth.tokens import default_token_generator
+from django.urls import reverse
+from .models import CustomUser  # Import your custom user model
 
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        try:
+            user = CustomUser.objects.get(email=email)
+            
+            # Generate token and uid
+            token = default_token_generator.make_token(user)
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            
+            # Build reset URL
+            reset_url = request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={'uidb64': uid, 'token': token})
+            )
+            
+            # Prepare email
+            subject = 'Password Reset Request'
+            email_template = 'reset_password_email.html'
+            email_context = {
+                'user': user,
+                'reset_url': reset_url,
+                'site_name': 'TRAVELIX',
+            }
+            
+            html_message = render_to_string(email_template, email_context)
+            plain_message = f"Hi {user.username}, click this link to reset your password: {reset_url}"
+            
+            # Send email
+            send_mail(
+                subject,
+                plain_message,
+                'noreply@yourwebsite.com',
+                [email],
+                html_message=html_message,
+                fail_silently=False
+            )
+            
+            messages.success(request, "Password reset link has been sent to your email.")
+            return redirect('login')
+            
+        except CustomUser.DoesNotExist:
+            messages.error(request, "No account found with that email address.")
+    
+    return render(request, 'forgot_password.html')
+
+def password_reset_confirm(request, uidb64, token):
+    try:
+        # Decode the user id
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = CustomUser.objects.get(pk=uid)
+        
+        # Verify token
+        if not default_token_generator.check_token(user, token):
+            messages.error(request, "Password reset link is invalid or has expired.")
+            return redirect('forgot_password')
+        
+        if request.method == 'POST':
+            password1 = request.POST.get('password1')
+            password2 = request.POST.get('password2')
+            
+            if password1 != password2:
+                messages.error(request, "Passwords don't match.")
+                return render(request, 'password_reset_confirm.html')
+            
+            # Set new password
+            user.set_password(password1)
+            user.save()
+            
+            messages.success(request, "Password has been reset successfully. You can now log in with your new password.")
+            return redirect('login')
+            
+        return render(request, 'password_reset_confirm.html')
+        
+    except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist):
+        messages.error(request, "Password reset link is invalid.")
+        return redirect('forgot_password')
+   

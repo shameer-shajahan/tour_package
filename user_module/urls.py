@@ -22,5 +22,7 @@ urlpatterns = [
     path('payment/success/', views.payment_success, name='payment_success'),
     path('payment/refund/', views.refund, name='refund'),
     path('card_input/<int:booking_id>/', views.card_input, name='card_input'),
+    path('forgot-password/', views.forgot_password, name='forgot_password'),
+    path('reset-password/<uidb64>/<token>/', views.password_reset_confirm, name='password_reset_confirm'),
 
     ]

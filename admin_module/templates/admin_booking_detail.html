@@ -1,125 +1,112 @@
 
+
+
+
 {% extends "admin_base.html" %}
 
-{% block title %}Booking Detail #{{ booking.id }}{% endblock %}
+{% block title %}Admin Users{% endblock %}
 
 {% block content %}
-<div class="booking-detail-container">
-    <div class="back-link">
-        <a href="{% url 'admin_bookings' %}">&larr; Back to all bookings</a>
-    </div>
-    
-    <h1>Booking Detail #{{ booking.id }}</h1>
-    
-    <div class="booking-status">
-        <span class="status-badge status-{{ booking.status }}">{{ booking.status }}</span>
-        
-        <div class="status-actions">
-            {% if booking.status == 'pending' %}
-            <a href="#" class="btn btn-confirm">Confirm Booking</a>
-            {% endif %}
-            {% if booking.status != 'cancelled' and booking.status != 'completed' %}
-            <a href="#" class="btn btn-cancel">Cancel Booking</a>
-            {% endif %}
-            {% if booking.status == 'confirmed' %}
-            <a href="#" class="btn btn-complete">Mark as Completed</a>
-            {% endif %}
-        </div>
-    </div>
-    
-    <div class="detail-sections">
-        <div class="detail-section">
-            <h2>Customer Information</h2>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="label">Name:</span>
-                    <span class="value">{{ booking.customer_name }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Email:</span>
-                    <span class="value">{{ booking.customer_email }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Phone:</span>
-                    <span class="value">{{ booking.customer_phone }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Address:</span>
-                    <span class="value">{{ booking.customer_address }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="detail-section">
-            <h2>Package Information</h2>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="label">Package:</span>
-                    <span class="value">{{ booking.package_name }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Duration:</span>
-                    <span class="value">{{ booking.package_duration }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Date:</span>
-                    <span class="value">{{ booking.booking_date }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Time:</span>
-                    <span class="value">{{ booking.booking_time }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="detail-section">
-            <h2>Payment Information</h2>
-            <div class="detail-grid">
-                <div class="detail-item">
-                    <span class="label">Amount:</span>
-                    <span class="value">${{ booking.amount }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Payment Method:</span>
-                    <span class="value">{{ booking.payment_method }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Payment Status:</span>
-                    <span class="value status-badge status-{{ booking.payment_status }}">{{ booking.payment_status }}</span>
-                </div>
-                <div class="detail-item">
-                    <span class="label">Transaction ID:</span>
-                    <span class="value">{{ booking.transaction_id }}</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="detail-section">
-            <h2>Additional Information</h2>
-            <div class="detail-notes">
-                <p>{{ booking.notes }}</p>
-            </div>
-        </div>
-    </div>
-    
-    <div class="booking-history">
-        <h2>Booking History</h2>
-        <ul class="history-timeline">
-            {% for event in booking_history %}
-            <li class="history-item">
-                <div class="history-time">{{ event.timestamp }}</div>
-                <div class="history-content">
-                    <div class="history-title">{{ event.action }}</div>
-                    <div class="history-user">by {{ event.user }}</div>
-                    {% if event.notes %}
-                    <div class="history-notes">{{ event.notes }}</div>
-                    {% endif %}
-                </div>
-            </li>
-            {% empty %}
-            <li class="history-item empty">No history available</li>
-            {% endfor %}
-        </ul>
-    </div>
+
+
+
+<div class="tour-packages-container">
+    <header class="packages-header">
+        <h1 class="packages-title">BOOKING DETAILS </h1> 
+    </header>
 </div>
+
+
+    <style>
+        .booking-details {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status-pending {
+            color: #ffc107;
+            font-weight: bold;
+        }
+        .status-confirmed {
+            color: #0d6efd;
+            font-weight: bold;
+        }
+        .status-completed {
+            color: #198754;
+            font-weight: bold;
+        }
+        .status-cancelled {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+
+<body>
+    <div class="container ">
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+             
+                
+
+                
+                <!-- Booking Details Card -->
+                <div class="booking-details">
+                    <h4>Booking id : {{ booking.booking_id }}</h4>
+                    <hr>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Customer:</strong> {{ booking.user.username }}</p>
+                            <p><strong>Email:</strong> {{ booking.user.email  }}</p>
+                            <p><strong>Phone:</strong> {{ booking.user.phone }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Date:</strong> {{ booking.booking_date }}</p>
+                            <p><strong>People:</strong> {{ booking.num_travelers }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <p><strong>Special Requests:</strong></p>
+                        <p>{{ booking.special_requests|default:"No special requests" }}</p>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>Status:</strong>
+                            <span class="status-{{ booking.booking_status }}">
+                                {{ booking.booking_status|title }}
+                            </span>
+                        </div>
+                        
+                        <!-- Status Update Form -->
+                        <form method="post" class="d-flex">
+                            {% csrf_token %}
+                            <select name="status" class="form-select me-2" aria-label="Update status">
+                                <option value="pending" {% if booking.booking_status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="confirmed" {% if booking.booking_status == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                                <option value="completed" {% if booking.booking_status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="cancelled" {% if booking.booking_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Back Button -->
+                <a href="{% url 'admin_bookings' %}" class="btn btn-secondary mt-3">
+                    Back to All Bookings
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+
 {% endblock %}
+
+

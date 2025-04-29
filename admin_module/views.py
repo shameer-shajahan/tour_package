@@ -5,12 +5,6 @@ from django.contrib.auth.decorators import login_required
 
 
 
-def admin_dashboard(request):
-    return render(request, "admin_dashboard.html")
-
-
-
-
 
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
@@ -60,9 +54,6 @@ def admin_dashboard(request):
     now = timezone.now()
     start_date = now - timedelta(days=365)  # Data for the past year
     
-
-
-    
     # Popular packages for pie chart
     popular_packages = Booking.objects.values(
         'tour_package__name'
@@ -106,6 +97,20 @@ def admin_users(request):
     return render(request, 'admin_users.html', context)
 
 @login_required
+def delete_user(request, user_id):
+
+    user = get_object_or_404(CustomUser, id=user_id)
+
+    if user.role == 'admin':
+        messages.error(request, "Cannot delete admin users.")
+        return redirect('admin_users')
+    
+    user.delete()
+
+    
+    return redirect('admin_users')
+
+@login_required
 def admin_packages(request):
     packages = TourPackage.objects.all().order_by('-created_at')
     
@@ -144,8 +149,9 @@ def admin_bookings(request):
 
 @login_required
 def admin_booking_detail(request, booking_id):
-    booking = get_object_or_404(Booking, id=booking_id)
     
+    booking = get_object_or_404(Booking, id=booking_id)
+
     # Handle status updates
     if request.method == 'POST':
         new_status = request.POST.get('status')
@@ -157,6 +163,8 @@ def admin_booking_detail(request, booking_id):
     
     context = {
         'booking': booking,
+  
+
     }
     
     return render(request, 'admin_booking_detail.html', context)
@@ -229,6 +237,16 @@ def admin_reports(request):
     return render(request, 'admin_reports.html', context)
 
 @login_required
+def delete_packager(request, packager_id):
+    packager = get_object_or_404(Packager, id=packager_id)
+    
+
+    packager.delete()
+
+    
+    return redirect('admin_packagers')
+
+@login_required
 def admin_settings(request):
     # Handle settings updates
     if request.method == 'POST':
@@ -243,3 +261,65 @@ def admin_settings(request):
     }
     
     return render(request, 'admin_settings.html', context)
+
+@login_required
+def admin_package_detail(request, package_id):
+  
+    try:
+        # Fetch the specific package with error handling
+        package = TourPackage.objects.get(id=package_id)
+        
+        # Prepare context data
+        context = {
+            'package': package
+        }
+        
+        # Render the template with the context
+        return render(request, 'admin_package_detail.html', context)
+    
+    except TourPackage.DoesNotExist:
+        # Handle case where package is not found
+        messages.error(request, 'The requested package could not be found.')
+        return redirect('admin_packagers')
+
+@login_required
+def admin_packages_list(request , package_id):
+
+    user=request.user
+
+    packager= get_object_or_404(Packager, id=package_id)
+    qs = TourPackage.objects.filter(packager=package_id)
+
+    context = {
+        'packager': packager,
+        'qs': qs,
+        'user': user
+    }
+
+    # Return the rendered page with the filtered tour packages
+    return render(request, 'admin_packager_list.html', context)
+
+@login_required
+def admin_delete_package(request, packager_id):
+
+    try:
+        # Get the tour package object or return 404 if not found
+        tour_package = get_object_or_404(TourPackage, id=packager_id)
+        
+        # Delete the tour package
+        tour_package.delete()
+        
+        # Add a success message
+        messages.success(request, "Tour package successfully deleted.")
+    except Exception as e:
+        # Handle any errors
+        messages.error(request, f"Error deleting tour package: {str(e)}")
+    
+    # Redirect back to the packager list
+    return redirect('admin_packages_list', package_id=tour_package.packager.id)
+
+
+
+
+
+

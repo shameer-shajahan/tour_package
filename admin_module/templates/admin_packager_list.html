@@ -1,5 +1,5 @@
 
-{% extends 'packager_base.html' %}
+{% extends 'admin_base.html' %}
 
 {% block title %}package list{% endblock %}
 
@@ -9,8 +9,7 @@
 
 <div class="tour-packages-container">
     <header class="packages-header">
-        <h1 class="packages-title">Explore Our Adventures</h1>
-        <p class="packages-subtitle">Curated experiences for every traveler - from serene getaways to thrilling expeditions</p>
+        <h1 class="packages-title">{{packager.user}}</h1>
     </header>
     
     <div class="packages-filter">
@@ -22,7 +21,7 @@
     </div>
     
     <div class="packages-grid">
-        {% for p in data %}
+        {% for p in qs %}
         <div class="package-card" data-category="all">
             <div class="package-image-container">
                 {% if p.image %}
@@ -55,25 +54,20 @@
                 </div>
                 
                 <div class="package-actions">
-                    <a href="{% url 'package_detail' p.id %}" class="btn-view">View Details</a>
-                    {% if user.packager %}
-                    <a href="{% url 'delete_package' p.id %}" class="btn-delete" onclick="return confirmDelete(event, '{{ p.name }}')">
+                    <a href="{% url 'admin_package_detail' p.id %}" class="btn-view">View Details</a>
+           
+                    <a href="{% url 'admin_delete_package' p.id %}" class="btn-delete" onclick="return confirmDelete(event, '{{ p.name }}')">
                         Delete <i class="fas fa-trash"></i>
                     </a>
-                    {% endif %}
+     
                 </div>
             </div>
         </div> 
         {% endfor %}
     </div>
-    
-    {% if user.packager %}
-    <div class="admin-actions">
-        <a href="{% url 'upload_package' %}" class="btn-add">
-            <i class="fas fa-plus"></i> Add New Package
-        </a>
-    </div>
-    {% endif %}
+
+
+
     
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
